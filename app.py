@@ -193,7 +193,7 @@ def _details(summary: str, body: str, open: bool = False) -> str:
     )
 
 
-def build_html(snapshots: list, parsed: list, title: str = "") -> str:
+def build_html(snapshots: list, parsed: list, title: str = "", other_files: list = None) -> str:
     sections = []
     for i in range(len(snapshots) - 1):
         cells_a = parsed[i]
@@ -250,6 +250,32 @@ def build_html(snapshots: list, parsed: list, title: str = "") -> str:
         block.append('<hr style="border:none;border-top:1px solid #dee2e6;margin:20px 0">')
         sections.append("".join(block))
 
+    if other_files:
+        other_parts = ['<h2>Other Files</h2>']
+        for f in other_files:
+            f.seek(0)
+            raw = f.read()
+            try:
+                text = raw.decode("utf-8")
+                other_parts.append(
+                    _details(
+                        f.name,
+                        f'<pre style="background:#f6f8fa;border:1px solid #e1e4e8;'
+                        f'border-radius:4px;padding:10px;font-size:13px;overflow-x:auto">'
+                        f'{_html_escape(text)}</pre>',
+                    )
+                )
+            except UnicodeDecodeError:
+                b64 = base64.b64encode(raw).decode()
+                other_parts.append(
+                    _details(
+                        f.name,
+                        f'<a href="data:application/octet-stream;base64,{b64}" '
+                        f'download="{_html_escape(f.name)}">Download {_html_escape(f.name)}</a>',
+                    )
+                )
+        sections.append("\n".join(other_parts))
+
     body_html = "\n".join(sections) if sections else "<p>No snapshots loaded.</p>"
     escaped_title = title.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
     return f"""<!DOCTYPE html>
@@ -287,7 +313,7 @@ for snap in snapshots:
 if snapshots:
     with st.sidebar:
         st.divider()
-        html_export = build_html(snapshots, parsed, title)
+        html_export = build_html(snapshots, parsed, title, other_files)
         st.download_button(
             "Download as HTML",
             data=html_export,
