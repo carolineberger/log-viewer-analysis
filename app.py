@@ -9,7 +9,7 @@ st.set_page_config(page_title="Log Viewer Analysis", layout="wide")
 st.title("Log Viewer — Notebook Snapshot Diff")
 
 # ---------------------------------------------------------------------------
-# Sidebar: upload snapshots + prompts
+# Sidebar: upload snapshots only
 # ---------------------------------------------------------------------------
 with st.sidebar:
     st.header("Snapshots")
@@ -20,12 +20,7 @@ with st.sidebar:
     )
     uploaded_files = sorted(uploaded_files, key=lambda f: f.name)
 
-    snapshots = []
-    for f in uploaded_files:
-        st.divider()
-        st.caption(f.name)
-        prompt = st.text_area("Prompt", key=f"prompt_{f.name}", height=80)
-        snapshots.append({"file": f, "prompt": prompt})
+snapshots = [{"file": f} for f in uploaded_files]
 
 
 # ---------------------------------------------------------------------------
@@ -125,18 +120,30 @@ for snap in snapshots:
     else:
         parsed.append(None)
 
-# Show pairwise diffs
+# Show conversation log
+if not snapshots:
+    st.info("Upload .ipynb snapshots in the sidebar to get started.")
+
 for i in range(len(snapshots) - 1):
     cells_a = parsed[i]
     cells_b = parsed[i + 1]
-    prompt_b = snapshots[i + 1]["prompt"]
-    name_a = snapshots[i]["file"].name if snapshots[i]["file"] else f"Snapshot {i + 1}"
     name_b = snapshots[i + 1]["file"].name if snapshots[i + 1]["file"] else f"Snapshot {i + 2}"
 
-    st.header(f"Diff: {name_a}  →  {name_b}")
-
-    if prompt_b:
-        st.info(f"**Prompt for snapshot {i + 2}:** {prompt_b}")
+    # Prompt input styled as a chat message
+    prompt = st.text_area(
+        "Prompt",
+        key=f"prompt_{name_b}",
+        height=80,
+        label_visibility="collapsed",
+        placeholder="Enter prompt...",
+    )
+    if prompt:
+        st.markdown(
+            f'<div style="background:#e8f4fd;border-left:3px solid #1a73e8;'
+            f'border-radius:4px;padding:10px 14px;margin-bottom:12px;'
+            f'font-size:15px">{prompt}</div>',
+            unsafe_allow_html=True,
+        )
 
     if cells_a is None or cells_b is None:
         st.warning("Upload both snapshots to see the diff.")
@@ -149,7 +156,7 @@ for i in range(len(snapshots) - 1):
     changed = sum(1 for d in diff if d["status"] == "changed")
     unchanged = sum(1 for d in diff if d["status"] == "unchanged")
     st.caption(
-        f"{added} added · {removed} removed · {changed} changed · {unchanged} unchanged"
+        f"{name_b} · {added} added · {removed} removed · {changed} changed · {unchanged} unchanged"
     )
 
     for entry in diff:
@@ -159,6 +166,3 @@ for i in range(len(snapshots) - 1):
         render_full_notebook(cells_b)
 
     st.divider()
-
-if not snapshots:
-    st.info("Upload .ipynb snapshots in the sidebar to get started.")
