@@ -35,13 +35,12 @@ with st.sidebar:
 def render_cell(cell: dict, key_prefix: str = ""):
     """Render a single notebook cell."""
     if cell["cell_type"] == "code":
-        st.code(cell["source"] or "(empty)", language="python")
+        if cell["source"]:
+            st.code(cell["source"], language="python")
     else:
         src = cell["source"] or ""
         if src.strip():
             st.markdown(src)
-        else:
-            st.caption("(empty markdown cell)")
 
     for output in cell.get("outputs", []):
         if output["type"] == "text":
@@ -86,34 +85,16 @@ def render_diff_cell(entry: dict):
     status = entry["status"]
 
     if status == "unchanged":
-        with st.expander("unchanged cell", expanded=False):
-            render_cell(entry["cell_b"])
+        return
 
     elif status == "added":
-        with st.container():
-            st.markdown(
-                '<div style="background:#d4edda;padding:8px;border-left:4px solid #28a745;'
-                'border-radius:4px;margin-bottom:4px"><strong>+ added</strong></div>',
-                unsafe_allow_html=True,
-            )
-            render_cell(entry["cell_b"])
+        render_cell(entry["cell_b"])
 
     elif status == "removed":
-        with st.container():
-            st.markdown(
-                '<div style="background:#f8d7da;padding:8px;border-left:4px solid #dc3545;'
-                'border-radius:4px;margin-bottom:4px"><strong>- removed</strong></div>',
-                unsafe_allow_html=True,
-            )
-            render_cell(entry["cell_a"])
+        render_cell(entry["cell_a"])
 
     elif status == "changed":
         with st.container():
-            st.markdown(
-                '<div style="background:#fff3cd;padding:8px;border-left:4px solid #ffc107;'
-                'border-radius:4px;margin-bottom:4px"><strong>~ changed</strong></div>',
-                unsafe_allow_html=True,
-            )
             if entry["text_diff"]:
                 render_inline_diff(entry["text_diff"])
             else:
