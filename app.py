@@ -76,6 +76,12 @@ def render_inline_diff(diff_lines: list[str]):
     st.markdown(html, unsafe_allow_html=True)
 
 
+def _cell_label(cell: dict) -> str:
+    src = (cell.get("source") or "").strip()
+    first_line = src.splitlines()[0] if src else ""
+    return first_line[:60] + ("…" if len(first_line) > 60 else "") if first_line else "(empty)"
+
+
 def render_diff_cell(entry: dict):
     status = entry["status"]
 
@@ -83,13 +89,15 @@ def render_diff_cell(entry: dict):
         return
 
     elif status == "added":
-        render_cell(entry["cell_b"])
+        with st.expander(f"+ {_cell_label(entry['cell_b'])}", expanded=False):
+            render_cell(entry["cell_b"])
 
     elif status == "removed":
-        render_cell(entry["cell_a"])
+        with st.expander(f"- {_cell_label(entry['cell_a'])}", expanded=False):
+            render_cell(entry["cell_a"])
 
     elif status == "changed":
-        with st.container():
+        with st.expander(f"~ {_cell_label(entry['cell_b'])}", expanded=False):
             if entry["text_diff"]:
                 render_inline_diff(entry["text_diff"])
             else:
