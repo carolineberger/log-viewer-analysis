@@ -54,6 +54,34 @@ def render_cell(cell: dict, key_prefix: str = ""):
                 st.caption("[image output — could not render]")
 
 
+def render_inline_diff(diff_lines: list[str]):
+    """Render unified diff lines with green/red line highlights."""
+    html_lines = []
+    for line in diff_lines:
+        if line.startswith("---") or line.startswith("+++"):
+            continue  # skip file headers
+        escaped = line.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        if line.startswith("+"):
+            style = "background:#d4edda;color:#155724"
+        elif line.startswith("-"):
+            style = "background:#f8d7da;color:#721c24"
+        elif line.startswith("@@"):
+            style = "background:#e2e3e5;color:#6c757d"
+        else:
+            style = "background:#f8f9fa;color:#212529"
+        html_lines.append(
+            f'<div style="font-family:monospace;font-size:13px;'
+            f'padding:1px 8px;white-space:pre;{style}">{escaped}</div>'
+        )
+    html = (
+        '<div style="border:1px solid #dee2e6;border-radius:4px;'
+        'overflow:hidden;margin-bottom:8px">'
+        + "".join(html_lines)
+        + "</div>"
+    )
+    st.markdown(html, unsafe_allow_html=True)
+
+
 def render_diff_cell(entry: dict):
     status = entry["status"]
 
@@ -86,17 +114,10 @@ def render_diff_cell(entry: dict):
                 'border-radius:4px;margin-bottom:4px"><strong>~ changed</strong></div>',
                 unsafe_allow_html=True,
             )
-            col_a, col_b = st.columns(2)
-            with col_a:
-                st.caption("Before")
-                render_cell(entry["cell_a"])
-            with col_b:
-                st.caption("After")
-                render_cell(entry["cell_b"])
             if entry["text_diff"]:
-                with st.expander("Inline text diff"):
-                    diff_text = "".join(entry["text_diff"])
-                    st.code(diff_text, language="diff")
+                render_inline_diff(entry["text_diff"])
+            else:
+                render_cell(entry["cell_b"])
 
 
 def render_full_notebook(cells: list[dict]):
