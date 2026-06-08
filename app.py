@@ -19,6 +19,14 @@ with st.sidebar:
         accept_multiple_files=True,
     )
     uploaded_files = sorted(uploaded_files, key=lambda f: f.name)
+    st.divider()
+    st.subheader("Other Files")
+    other_files = st.file_uploader(
+        "Upload other files",
+        accept_multiple_files=True,
+        key="other_files",
+    )
+    other_files = sorted(other_files, key=lambda f: f.name)
 
 snapshots = [{"file": f} for f in uploaded_files]
 
@@ -334,3 +342,23 @@ for i in range(len(snapshots) - 1):
         render_full_notebook(cells_b)
 
     st.divider()
+
+# ---------------------------------------------------------------------------
+# Other uploaded files (always at the bottom)
+# ---------------------------------------------------------------------------
+if other_files:
+    st.header("Other Files")
+    for f in other_files:
+        with st.expander(f.name, expanded=False):
+            f.seek(0)
+            raw = f.read()
+            try:
+                text = raw.decode("utf-8")
+                st.code(text)
+            except UnicodeDecodeError:
+                st.download_button(
+                    f"Download {f.name}",
+                    data=raw,
+                    file_name=f.name,
+                    use_container_width=True,
+                )
