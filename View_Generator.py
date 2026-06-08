@@ -298,7 +298,7 @@ def build_html(snapshots: list, parsed: list, title: str = "", other_files: list
 
 
 # ---------------------------------------------------------------------------
-# Main area: pairwise diffs
+# Main area: tabs
 # ---------------------------------------------------------------------------
 
 # Parse all uploaded notebooks (cache per file content to avoid re-parsing)
