@@ -13,23 +13,19 @@ st.title("Log Viewer — Notebook Snapshot Diff")
 # ---------------------------------------------------------------------------
 with st.sidebar:
     st.header("Snapshots")
-    n = st.number_input("Number of snapshots", min_value=2, max_value=20, value=2, step=1)
+    uploaded_files = st.file_uploader(
+        "Upload .ipynb snapshots",
+        type=["ipynb"],
+        accept_multiple_files=True,
+    )
+    uploaded_files = sorted(uploaded_files, key=lambda f: f.name)
 
-    snapshots = []  # list of {"file": UploadedFile | None, "prompt": str}
-    for i in range(int(n)):
+    snapshots = []
+    for f in uploaded_files:
         st.divider()
-        st.subheader(f"Snapshot {i + 1}")
-        uploaded = st.file_uploader(
-            f"Upload .ipynb #{i + 1}",
-            type=["ipynb"],
-            key=f"file_{i}",
-        )
-        prompt = st.text_area(
-            f"Prompt for snapshot {i + 1}",
-            key=f"prompt_{i}",
-            height=80,
-        )
-        snapshots.append({"file": uploaded, "prompt": prompt})
+        st.caption(f.name)
+        prompt = st.text_area("Prompt", key=f"prompt_{f.name}", height=80)
+        snapshots.append({"file": f, "prompt": prompt})
 
 
 # ---------------------------------------------------------------------------
@@ -128,7 +124,7 @@ for snap in snapshots:
         parsed.append(None)
 
 # Show pairwise diffs
-for i in range(int(n) - 1):
+for i in range(len(snapshots) - 1):
     cells_a = parsed[i]
     cells_b = parsed[i + 1]
     prompt_b = snapshots[i + 1]["prompt"]
@@ -162,5 +158,5 @@ for i in range(int(n) - 1):
 
     st.divider()
 
-if all(s["file"] is None for s in snapshots):
+if not snapshots:
     st.info("Upload .ipynb snapshots in the sidebar to get started.")
