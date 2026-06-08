@@ -6,13 +6,13 @@ import streamlit as st
 from notebook_utils import diff_notebooks, parse_notebook
 
 st.set_page_config(page_title="Log Viewer Analysis", layout="wide")
-st.title("Log Viewer — Notebook Snapshot Diff")
 
 # ---------------------------------------------------------------------------
 # Sidebar: upload snapshots only
 # ---------------------------------------------------------------------------
 with st.sidebar:
     st.header("Snapshots")
+    title = st.text_input("Title", value="Log Viewer — Notebook Snapshot Diff", label_visibility="collapsed")
     uploaded_files = st.file_uploader(
         "Upload .ipynb snapshots",
         type=["ipynb"],
@@ -21,6 +21,8 @@ with st.sidebar:
     uploaded_files = sorted(uploaded_files, key=lambda f: f.name)
 
 snapshots = [{"file": f} for f in uploaded_files]
+
+st.title(title)
 
 
 # ---------------------------------------------------------------------------
@@ -183,7 +185,7 @@ def _details(summary: str, body: str, open: bool = False) -> str:
     )
 
 
-def build_html(snapshots: list, parsed: list) -> str:
+def build_html(snapshots: list, parsed: list, title: str = "") -> str:
     sections = []
     for i in range(len(snapshots) - 1):
         cells_a = parsed[i]
@@ -241,15 +243,16 @@ def build_html(snapshots: list, parsed: list) -> str:
         sections.append("".join(block))
 
     body_html = "\n".join(sections) if sections else "<p>No snapshots loaded.</p>"
+    escaped_title = title.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Log Viewer — Notebook Snapshot Diff</title>
+<title>{escaped_title}</title>
 <style>body{{font-family:sans-serif;max-width:900px;margin:40px auto;padding:0 20px}}</style>
 </head>
 <body>
-<h1>Log Viewer — Notebook Snapshot Diff</h1>
+<h1>{escaped_title}</h1>
 {body_html}
 </body>
 </html>"""
@@ -276,7 +279,7 @@ for snap in snapshots:
 if snapshots:
     with st.sidebar:
         st.divider()
-        html_export = build_html(snapshots, parsed)
+        html_export = build_html(snapshots, parsed, title)
         st.download_button(
             "Download as HTML",
             data=html_export,
