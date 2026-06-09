@@ -27,6 +27,11 @@ with st.sidebar:
         key="other_files",
     )
     other_files = sorted(other_files, key=lambda f: f.name)
+    st.divider()
+    st.markdown(
+        "[GitHub Repository](https://github.com/carolineberger/log-viewer-analysis) · "
+        "[README](https://github.com/carolineberger/log-viewer-analysis/blob/main/README.md)"
+    )
 
 snapshots = [{"file": f} for f in uploaded_files]
 
