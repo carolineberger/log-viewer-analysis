@@ -6,13 +6,34 @@ from bs4 import BeautifulSoup
 
 load_dotenv()
 
-litellm.api_key = os.environ.get("LITE_LLM_KEY")
 litellm.api_base = "https://litellm.stream.cavi.au.dk/"
-
 MODEL = "openai/natai/gpt-oss"
 
 
 st.set_page_config(page_title="AI Change Analysis", layout="wide")
+
+
+@st.dialog("Enter API Key")
+def ask_for_api_key():
+    st.write("Enter your API key to use AI analysis.")
+    key = st.text_input("API Key", type="password")
+    if st.button("Submit"):
+        if key.strip():
+            st.session_state["LITE_LLM_KEY"] = key.strip()
+            st.rerun()
+        else:
+            st.error("Please enter a valid API key.")
+
+
+if "LITE_LLM_KEY" not in st.session_state:
+    env_key = os.environ.get("LITE_LLM_KEY")
+    if env_key:
+        st.session_state["LITE_LLM_KEY"] = env_key
+    else:
+        ask_for_api_key()
+        st.stop()
+
+litellm.api_key = st.session_state["LITE_LLM_KEY"]
 
 st.title("AI Change Analysis")
 
