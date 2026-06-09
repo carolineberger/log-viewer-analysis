@@ -48,3 +48,6 @@ with st.spinner("Generating overview..."):
 
 st.subheader("Overview")
 st.write(response.choices[0].message.content)
+
+st.subheader("HTML Preview")
+st.components.v1.html(html_content, height=600, scrolling=True)
