@@ -2,3 +2,4 @@ streamlit
 nbformat
 litellm
 python-dotenv
+beautifulsoup4
