@@ -1,4 +1,15 @@
+import os
 import streamlit as st
+from dotenv import load_dotenv
+import litellm
+
+load_dotenv()
+
+litellm.api_key = os.environ.get("LITE_LLM_KEY")
+litellm.api_base = "https://litellm.stream.cavi.au.dk/"
+
+MODEL = "openai/natai/gpt-oss"
+
 
 st.set_page_config(page_title="AI Change Analysis", layout="wide")
 
