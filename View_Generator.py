@@ -5,7 +5,7 @@ import streamlit as st
 
 from notebook_utils import diff_notebooks, parse_notebook
 
-st.set_page_config(page_title="Log Viewer Analysis", layout="wide")
+st.set_page_config(page_title="View Generator", layout="wide")
 
 # ---------------------------------------------------------------------------
 # Sidebar: upload snapshots only
