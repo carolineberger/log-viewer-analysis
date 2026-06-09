@@ -10,6 +10,12 @@ A Streamlit app for visualizing and analyzing notebook diffs from log snapshots.
 - Export diffs as standalone HTML files
 - In progress - AI-powered change analysis via the AI Change Analysis page
 
+## Live Application
+
+The app is available at https://log-viewer-analysis.streamlit.app/
+
+An API key is required for the AI Change Analysis page. Contact Caroline at caroline.berger@cs.au.dk to request a key.
+
 ## Getting Started
 
 ### Install dependencies
