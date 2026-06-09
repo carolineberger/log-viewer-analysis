@@ -1,5 +1,6 @@
 import base64
 import io
+import re
 
 import streamlit as st
 
@@ -18,7 +19,7 @@ with st.sidebar:
         type=["ipynb"],
         accept_multiple_files=True,
     )
-    uploaded_files = sorted(uploaded_files, key=lambda f: f.name)
+    uploaded_files = sorted(uploaded_files, key=lambda f: [int(c) if c.isdigit() else c.lower() for c in re.split(r'(\d+)', f.name)])
     st.divider()
     st.subheader("Other Files")
     other_files = st.file_uploader(
@@ -26,7 +27,7 @@ with st.sidebar:
         accept_multiple_files=True,
         key="other_files",
     )
-    other_files = sorted(other_files, key=lambda f: f.name)
+    other_files = sorted(other_files, key=lambda f: [int(c) if c.isdigit() else c.lower() for c in re.split(r'(\d+)', f.name)])
     st.divider()
     st.markdown(
         "[GitHub Repository](https://github.com/carolineberger/log-viewer-analysis) · "
