@@ -28,3 +28,23 @@ if uploaded_html is None:
 
 html_content = uploaded_html.read().decode("utf-8")
 st.success(f"Loaded: {uploaded_html.name}")
+
+with st.spinner("Generating overview..."):
+    response = litellm.completion(
+        model=MODEL,
+        api_base=litellm.api_base,
+        api_key=litellm.api_key,
+        messages=[
+            {
+                "role": "user",
+                "content": (
+                    "The following is an HTML diff of a Jupyter notebook. "
+                    "Give a two-sentence overview of what changed.\n\n"
+                    + html_content
+                ),
+            }
+        ],
+    )
+
+st.subheader("Overview")
+st.write(response.choices[0].message.content)
